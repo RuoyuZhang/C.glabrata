@@ -291,7 +291,7 @@ newdata$chr=mapvalues(newdata$chr,from=c("chr1","chr2","chr3","chr4","chr5","chr
 savedata=newdata[,2:5]
 write.table(file=paste0(out_dir,"/tmp.txt"),savedata,col.names=F,row.names=F,quote=F)
 tiff(filename=paste0(out_dir,"fig6A.tif"),width=174, height=80, units="mm",res=500)
-plot(newdata[,5],pch=19,col="darkgreen",xlab="Genome position",ylab="log2(Ratio)",xaxt="n")
+plot(newdata[,5],pch=19,col="darkgreen",xlab="",ylab="log2(Copy Number)",xaxt="n")
 abline(v=0,lty=3)
 chr<-summary(newdata[,2])
 st=0
