@@ -250,8 +250,8 @@ chr.data <- subset(all.data, Chrom=="chr4")
 p1=ggplot(data=chr.data, aes(x= Start, y= CopyNum))+ geom_point(aes(color=CopyNum))+
     scale_x_continuous(labels = scales::unit_format("Kb", 1e-3), breaks=scales::pretty_breaks(n=3))+
     geom_vline(aes(xintercept= 600000), linetype="dashed", size=1.2)+ ylim(c(-1.5,2))+
-    scale_colour_gradient(name='Copy Number',limits=c(-2,2),low = "blue", high = "red")+ggtitle("Strain Y625 ChrD")+
-    ylab("Copy Number")	+ xlab("")
+    scale_colour_gradient(name='log2(Copy Number)',limits=c(-2,2),low = "blue", high = "red")+ggtitle("Strain Y625 ChrD")+
+    ylab("log2(Copy Number)")	+ xlab("")
 
 column.types <- c("character", "numeric", "numeric", "numeric")
 all.data <- read.table("f:/Cornell/experiment/c.glabrata/manuscript/analysis/scripts/11_cnv.seg", header=FALSE, colClasses=column.types)
@@ -262,8 +262,8 @@ chr.data <- subset(all.data, Chrom=="chr4")
 p2=ggplot(data=chr.data, aes(x= Start, y= CopyNum))+ geom_point(aes(color=CopyNum))+
     scale_x_continuous(labels = scales::unit_format("Kb", 1e-3), breaks=scales::pretty_breaks(n=3))+
     geom_vline(aes(xintercept= 600000), linetype="dashed", size=1.2)+ ylim(c(-1.5,2))+
-    scale_colour_gradient(name='Copy Number',limits=c(-2,2),low = "blue", high = "red")+ggtitle("Strain Y622 ChrD")+
-    ylab("Copy Number")	+ xlab("")
+    scale_colour_gradient(name='log2(Copy Number)',limits=c(-2,2),low = "blue", high = "red")+ggtitle("Strain Y622 ChrD")+
+    ylab("log2(Copy Number)")	+ xlab("")
 
 plot12=grid_arrange_shared_legend(p1, p2, ncol = 2, nrow = 1)
 ggsave(plot12,filename=paste0(out_dir,"/","fig6B.tiff"), width=174, height=100, units='mm', dpi=500)
