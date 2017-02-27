@@ -291,24 +291,6 @@ newdata$chr=mapvalues(newdata$chr,from=c("chr1","chr2","chr3","chr4","chr5","chr
                          to=c("chrA","chrB","chrC","chrD","chrE","chrF","chrG","chrH","chrI","chrJ","chrK","chrL","chrM"))
 
 savedata=newdata[,2:5]
-#write.table(file=paste0(out_dir,"/tmp.txt"),savedata,col.names=F,row.names=F,quote=F)
-#tiff(filename=paste0(out_dir,"fig6A.tif"),width=174, height=80, units="mm",res=500)
-#plot(newdata[,5],pch=19,cex=0.6,col="darkgreen",xlab="",ylab="log2(Copy Number)",xlim=c(230,12100),xaxt="n")
-#abline(v=0,lty=3)
-#chr<-summary(newdata[,2])
-#st=0
-#end<-st;st<-st+chr[[1]];pos<-(end+st)/2;abline(v=st,lty=3);text(pos,-7,labels=newdata[st,2][1],cex = 0.7);#segments(0, 1, x1 = st, y1 = 1, col = "blue", lwd =2)
-#end<-st;st<-st+chr[[2]];pos<-(end+st)/2;abline(v=st,lty=3);text(pos,-6,labels=newdata[st,2][1],cex = 0.7)
-#for(i in 3:length(chr))
-#{
-#    end<-st
-#    st<-st+chr[[i]]
-#    pos<-(end+st)/2
-#    abline(v=st,lty=3)
-#    text(pos,-5,labels=newdata[st,2][1],cex = 0.7)
-#}
-#segments(0, 1, x1 = end, y1 = 1, col = "blue", lty=4,lwd =1)
-#dev.off()
 
 wcnd.df = data.frame(x=seq(1,length(newdata[,5])),value=newdata[,5])
 p3=ggplot(wcnd.df,aes(x,value,color=value))+geom_point()+ylim(c(-2,2))+ylab("log2(Copy Number)")+xlab("")+
@@ -362,4 +344,107 @@ cnv.data2 = read.table("f:/Cornell/experiment/c.glabrata/manuscript/analysis/scr
 df=gwas(Xa=cnv.data2,phe=fly.drug$survive,pc1=plink.pca$PC1,pc2=plink.pca$PC2,pc3=plink.pca$PC3,maf=0.05)
 
 df2=gwas(Xa=cnv.data2,phe=fly.drug$fluconazole,pc1=plink.pca$PC1,pc2=plink.pca$PC2,pc3=plink.pca$PC3,maf=0.05)
+
+
+# suplementary 
+# Fig S1
+draw.cnv = function(sup_dir,out_dir,note,name){
+    Cagl_uncorrected_reads <- wigsToRangedData(paste0(sup_dir,note,"_readcounts.wig"), paste0(sup_dir,"Cagl.gc.wig"), paste0(sup_dir,"Cagl.map.wig"))
+    Cagl_corrected_copy <- correctReadcount(Cagl_uncorrected_reads)
+    param <- HMMsegment(Cagl_corrected_copy, getparam = TRUE)
+    param$mu <- log(c(1, 1.4, 2, 2.7, 3, 4.5) / 2, 2)
+    param$m <- param$mu
+    segmented_copy <- HMMsegment(Cagl_corrected_copy, param)
+    rangedDataToSeg(Cagl_corrected_copy, file = "Cagl_corrected_copy.seg")
+    dat<-read.table("Cagl_corrected_copy.seg",header=T,sep="\t")
+    chrOrder<-paste("chr",1:13,sep="")
+    dat$chr <-factor(dat$chr, levels=chrOrder)
+    newdata <-dat[order(dat$chr),]
+    newdata = newdata[newdata$chr!="chr14",]
+
+    newdata$chr=factor(newdata$chr,c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13"))
+    newdata$chr=mapvalues(newdata$chr,from=c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13"),
+                      to=c("chrA","chrB","chrC","chrD","chrE","chrF","chrG","chrH","chrI","chrJ","chrK","chrL","chrM"))
+
+    wcnd.df = data.frame(x=seq(1,length(newdata[,5])),value=newdata[,5])
+    p3=ggplot(wcnd.df,aes(x,value,color=value))+geom_point()+ylim(c(-2,2))+ylab("log2(Copy Number)")+xlab("")+
+        scale_colour_gradient2(name='log2(Copy Number)',limits=c(-2,2),low = "purple",mid="blue", high = "red")+theme(legend.position ='none')+
+        theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),axis.text.x = element_blank(),axis.ticks.x = element_blank(),plot.title = element_text(hjust = 0.5))+
+        ggtitle(name)
+
+    p3=p3+geom_vline(xintercept = 0,linetype=2)
+    #chr<-summary(newdata[,2])
+    st=0
+    end<-st;st<-st+chr[[1]];pos<-(end+st)/2;p3=p3+geom_vline(xintercept = st,linetype=2);p3=p3+annotate("text",x=pos,y=-2,label=as.character(newdata[st,2][1]),size=3)
+    end<-st;st<-st+chr[[2]];pos<-(end+st)/2;p3=p3+geom_vline(xintercept = st,linetype=2);p3=p3+annotate("text",x=pos,y=-1.8,label=as.character(newdata[st,2][1]),size=3)
+    for(i in 3:length(chr)){
+        end<-st
+        st<-st+chr[[i]]
+        pos<-(end+st)/2
+        p3=p3+geom_vline(xintercept = st,linetype=2)
+        p3=p3+annotate("text",x=pos,y=-1.6,label=as.character(newdata[st,2][1]),size=3)
+    
+    }
+    
+    ggsave(p3,filename=paste0(out_dir,"/sup/",name,".tiff"), width=174, height=100, units='mm', dpi=500)
+    return(p3)
+}
+
+# Y625 14; Y626 15; Y627 16; Y641 18; Y645 21; Y648 24
+sup_dir = "f:/Cornell/experiment/c.glabrata/manuscript/analysis/scripts/wig/"
+
+Y625=draw.cnv(sup_dir = sup_dir,out_dir = out_dir,note = 14,name='Y625')
+Y626=draw.cnv(sup_dir = sup_dir,out_dir = out_dir,note = 15,name='Y626')
+Y627=draw.cnv(sup_dir = sup_dir,out_dir = out_dir,note = 16,name='Y627')
+Y641=draw.cnv(sup_dir = sup_dir,out_dir = out_dir,note = 18,name='Y641')
+Y645=draw.cnv(sup_dir = sup_dir,out_dir = out_dir,note = 21,name='Y645')
+Y648=draw.cnv(sup_dir = sup_dir,out_dir = out_dir,note = 24,name='Y648')
+
+plotFS1=grid_arrange_shared_legend(Y625,Y626,Y627,Y641,Y645,Y648, ncol = 1, nrow = 6)
+ggsave(plotFS1,filename=paste0(out_dir,"/sup/","FigS1.tiff"), width=174, height=300, units='mm', dpi=500)
+
+
+# Fig S2
+draw.chr = function(sup_dir,out_dir,note,name,chr){
+    column.types <- c("character", "numeric", "numeric", "numeric")
+    all.data <- read.table(paste0(sup_dir,note,"_cnv.seg"), header=FALSE, colClasses=column.types)
+    colnames(all.data)<-c("Chrom","Start","End","CopyNum")
+    chr.data <- subset(all.data, Chrom==chr)
+    
+    p=ggplot(data=chr.data, aes(x= Start, y= CopyNum))+ geom_point(aes(color=CopyNum))+
+        scale_x_continuous(labels = scales::unit_format("Kb", 1e-3), breaks=scales::pretty_breaks(n=3))+
+        ylim(c(-1.5,2))+
+        scale_colour_gradient2(name='log2(Copy Number)',limits=c(-2,2),low = 'purple', mid = "blue", high = "red")+ggtitle(name)+
+        ylab("log2(Copy Number)")	+ xlab("") +theme(plot.title = element_text(hjust = 0.5))
+    return(p)
+}
+
+
+# chrD 4: Y622 11; Y625 14; Y1640 41; Y1641 42; Y1642 43; Y1644 45
+Y622=draw.chr(sup_dir = sup_dir,out_dir = out_dir,note=11,name='Y622',chr="chr4")
+Y625=draw.chr(sup_dir = sup_dir,out_dir = out_dir,note=14,name='Y625',chr="chr4")
+Y1640=draw.chr(sup_dir = sup_dir,out_dir = out_dir,note=41,name='Y1640',chr="chr4")
+Y1641=draw.chr(sup_dir = sup_dir,out_dir = out_dir,note=42,name='Y1641',chr="chr4")
+Y1642=draw.chr(sup_dir = sup_dir,out_dir = out_dir,note=43,name='Y1642',chr="chr4")
+Y1644=draw.chr(sup_dir = sup_dir,out_dir = out_dir,note=45,name='Y1644',chr="chr4")
+plotA=grid_arrange_shared_legend(Y622,Y625,Y1640,Y1641,Y1642,Y1644, ncol = 2, nrow = 3)
+ggsave(plotA,filename=paste0(out_dir,"/sup/","FigS2A.tiff"), width=174, height=200, units='mm', dpi=500)
+
+# chrE 5: Y621 10; Y622 11; Y624 13; Y1641 42
+Y621=draw.chr(sup_dir = sup_dir,out_dir = out_dir,note=10,name='Y621',chr="chr5")
+Y622=draw.chr(sup_dir = sup_dir,out_dir = out_dir,note=11,name='Y622',chr="chr5")
+Y624=draw.chr(sup_dir = sup_dir,out_dir = out_dir,note=13,name='Y624',chr="chr5")
+Y1641=draw.chr(sup_dir = sup_dir,out_dir = out_dir,note=42,name='Y1641',chr="chr5")
+plotA=grid_arrange_shared_legend(Y621,Y622,Y624,Y1641, ncol = 2, nrow = 2)
+ggsave(plotA,filename=paste0(out_dir,"/sup/","FigS2B.tiff"), width=174, height=150, units='mm', dpi=500)
+
+
+# chrL 12: Y622 11; Y645 21; Y656 31
+Y622=draw.chr(sup_dir = sup_dir,out_dir = out_dir,note=11,name='Y622',chr="chr12")
+Y645=draw.chr(sup_dir = sup_dir,out_dir = out_dir,note=21,name='Y645',chr="chr12")
+Y656=draw.chr(sup_dir = sup_dir,out_dir = out_dir,note=31,name='Y656',chr="chr12")
+plotA=grid_arrange_shared_legend(Y622,Y645,Y656, ncol = 2, nrow = 2)
+ggsave(plotA,filename=paste0(out_dir,"/sup/","FigS2C.tiff"), width=174, height=150, units='mm', dpi=500)
+
+
 
