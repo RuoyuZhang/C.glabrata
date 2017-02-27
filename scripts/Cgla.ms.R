@@ -119,7 +119,8 @@ summary(lm(chrCNV$Length~chrCNV$Total))
 cor.test(chrCNV$Length,chrCNV$Total)
 chrCNV$Lengthk = chrCNV$Length/1000
 p4=ggplot(chrCNV,aes(Lengthk,Total))+geom_point()+geom_smooth(method = 'lm',se=F)+xlab("Chromosome Length (kb)")+
-    annotate("text", x = 1000, y = 7.5, label = c("rho = -0.3329"),size=3)+ theme(axis.title=element_text(size=9))
+    annotate("text", x = 1000, y = 7.5, label = c("rho = -0.3329"),size=3)+ theme(axis.title=element_text(size=9))+
+    ylab("Count of Large CNVs") + scale_y_continuous(breaks = seq(0,10,2))
 
 
 #up_row <- plot_grid(p1, p2, labels = c('A', 'B'), align = 'v')
