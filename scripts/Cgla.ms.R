@@ -253,7 +253,7 @@ p1=ggplot(data=chr.data, aes(x= Start, y= CopyNum))+ geom_point(aes(color=CopyNu
     scale_x_continuous(labels = scales::unit_format("Kb", 1e-3), breaks=scales::pretty_breaks(n=3))+
     geom_vline(aes(xintercept= 600000), linetype="dashed", size=1.2)+ ylim(c(-1.5,2))+
     scale_colour_gradient2(name='log2(Copy Number)',limits=c(-2,2),low = 'purple', mid = "blue", high = "red")+ggtitle("Strain Y625 ChrD")+
-    ylab("log2(Copy Number)")	+ xlab("")
+    ylab("log2(Copy Number)")	+ xlab("") +theme(plot.title = element_text(hjust = 0.5))
 
 column.types <- c("character", "numeric", "numeric", "numeric")
 all.data <- read.table("f:/Cornell/experiment/c.glabrata/manuscript/analysis/scripts/11_cnv.seg", header=FALSE, colClasses=column.types)
@@ -265,7 +265,7 @@ p2=ggplot(data=chr.data, aes(x= Start, y= CopyNum))+ geom_point(aes(color=CopyNu
     scale_x_continuous(labels = scales::unit_format("Kb", 1e-3), breaks=scales::pretty_breaks(n=3))+
     geom_vline(aes(xintercept= 600000), linetype="dashed", size=1.2)+ ylim(c(-1.5,2))+
     scale_colour_gradient2(name='log2(Copy Number)',limits=c(-2,2),low = "purple",mid="blue", high = "red")+ggtitle("Strain Y622 ChrD")+
-    ylab("log2(Copy Number)")	+ xlab("")
+    ylab("log2(Copy Number)")+ xlab("") +theme(plot.title = element_text(hjust = 0.5))
 
 plot12=grid_arrange_shared_legend(p1, p2, ncol = 1, nrow = 2)
 ggsave(plot12,filename=paste0(out_dir,"/","fig6B.tiff"), width=154, height=120, units='mm', dpi=500)
@@ -310,8 +310,30 @@ for(i in 3:length(chr))
 segments(0, 1, x1 = end, y1 = 1, col = "blue", lty=4,lwd =1)
 dev.off()
 
+wcnd.df = data.frame(x=seq(1,length(newdata[,5])),value=newdata[,5])
+p3=ggplot(wcnd.df,aes(x,value,color=value))+geom_point()+ylim(c(-2,2))+ylab("log2(Copy Number)")+xlab("")+
+    scale_colour_gradient2(name='log2(Copy Number)',limits=c(-2,2),low = "purple",mid="blue", high = "red")+theme(legend.position ='none')+
+    theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),axis.text.x = element_blank(),axis.ticks.x = element_blank())
 
-
+p3=p3+geom_vline(xintercept = 0,linetype=2)
+#chr<-summary(newdata[,2])
+st=0
+end<-st;st<-st+chr[[1]];pos<-(end+st)/2;p3=p3+geom_vline(xintercept = st,linetype=2);p3=p3+annotate("text",x=pos,y=-2,label=as.character(newdata[st,2][1]),size=3)
+end<-st;st<-st+chr[[2]];pos<-(end+st)/2;p3=p3+geom_vline(xintercept = st,linetype=2);p3=p3+annotate("text",x=pos,y=-1.8,label=as.character(newdata[st,2][1]),size=3)
+for(i in 3:length(chr))
+{
+    end<-st
+    st<-st+chr[[i]]
+    pos<-(end+st)/2
+    p3=p3+geom_vline(xintercept = st,linetype=2)
+    p3=p3+annotate("text",x=pos,y=-1.6,label=as.character(newdata[st,2][1]),size=3)
+    
+}
+p3
+ggsave(p3,filename=paste0(out_dir,"/","fig6A2.tiff"), width=174, height=80, units='mm', dpi=500)
+         
+p4=plot_grid(p3,plot12,nrow = 2,rel_heights = c(1,2))
+ggsave(p4,filename=paste0(out_dir,"/","fig6.tiff"), width=174, height=180, units='mm', dpi=500)
 
 ###gwas for cnv
 gwas=function(Xa,phe,pc1,pc2,pc3,maf=0.05){
