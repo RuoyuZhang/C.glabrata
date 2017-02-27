@@ -95,7 +95,7 @@ p1=ggplot(exom10k,aes(start,pi,color=chr))+geom_line(size=I(0.5))+facet_grid(~ch
           strip.background = element_blank(),
           panel.border = element_rect(colour = "gray"),
           axis.ticks.x = element_blank(),axis.text.x = element_blank(),axis.text.y = element_text(size = 8),
-          axis.title.y =element_text(size=7),
+          axis.title.y =element_text(size=8),
           panel.spacing.x = unit(0.1, "mm"))
 
 fmt_dcimals <- function(decimals=0){function(x) format(x,nsmall = decimals,scientific = FALSE)}
@@ -292,23 +292,23 @@ newdata$chr=mapvalues(newdata$chr,from=c("chr1","chr2","chr3","chr4","chr5","chr
 
 savedata=newdata[,2:5]
 #write.table(file=paste0(out_dir,"/tmp.txt"),savedata,col.names=F,row.names=F,quote=F)
-tiff(filename=paste0(out_dir,"fig6A.tif"),width=174, height=80, units="mm",res=500)
-plot(newdata[,5],pch=19,cex=0.6,col="darkgreen",xlab="",ylab="log2(Copy Number)",xlim=c(230,12100),xaxt="n")
-abline(v=0,lty=3)
-chr<-summary(newdata[,2])
-st=0
-end<-st;st<-st+chr[[1]];pos<-(end+st)/2;abline(v=st,lty=3);text(pos,-7,labels=newdata[st,2][1],cex = 0.7);#segments(0, 1, x1 = st, y1 = 1, col = "blue", lwd =2)
-end<-st;st<-st+chr[[2]];pos<-(end+st)/2;abline(v=st,lty=3);text(pos,-6,labels=newdata[st,2][1],cex = 0.7)
-for(i in 3:length(chr))
-{
-    end<-st
-    st<-st+chr[[i]]
-    pos<-(end+st)/2
-    abline(v=st,lty=3)
-    text(pos,-5,labels=newdata[st,2][1],cex = 0.7)
-}
-segments(0, 1, x1 = end, y1 = 1, col = "blue", lty=4,lwd =1)
-dev.off()
+#tiff(filename=paste0(out_dir,"fig6A.tif"),width=174, height=80, units="mm",res=500)
+#plot(newdata[,5],pch=19,cex=0.6,col="darkgreen",xlab="",ylab="log2(Copy Number)",xlim=c(230,12100),xaxt="n")
+#abline(v=0,lty=3)
+#chr<-summary(newdata[,2])
+#st=0
+#end<-st;st<-st+chr[[1]];pos<-(end+st)/2;abline(v=st,lty=3);text(pos,-7,labels=newdata[st,2][1],cex = 0.7);#segments(0, 1, x1 = st, y1 = 1, col = "blue", lwd =2)
+#end<-st;st<-st+chr[[2]];pos<-(end+st)/2;abline(v=st,lty=3);text(pos,-6,labels=newdata[st,2][1],cex = 0.7)
+#for(i in 3:length(chr))
+#{
+#    end<-st
+#    st<-st+chr[[i]]
+#    pos<-(end+st)/2
+#    abline(v=st,lty=3)
+#    text(pos,-5,labels=newdata[st,2][1],cex = 0.7)
+#}
+#segments(0, 1, x1 = end, y1 = 1, col = "blue", lty=4,lwd =1)
+#dev.off()
 
 wcnd.df = data.frame(x=seq(1,length(newdata[,5])),value=newdata[,5])
 p3=ggplot(wcnd.df,aes(x,value,color=value))+geom_point()+ylim(c(-2,2))+ylab("log2(Copy Number)")+xlab("")+
