@@ -98,8 +98,9 @@ p1=ggplot(exom10k,aes(start,pi,color=chr))+geom_line(size=I(0.5))+facet_grid(~ch
           axis.title.y =element_text(size=7),
           panel.spacing.x = unit(0.1, "mm"))
 
+fmt_dcimals <- function(decimals=0){function(x) format(x,nsmall = decimals,scientific = FALSE)}
 p2=ggplot(bin.cds.df,aes(pos,freq,color=chr))+geom_line(size=I(0.5))+facet_grid(~chr,scales="free_x",space='free_x')+xlab("")+ylab("Duplication Frequency")+
-    scale_color_discrete(guide=F)+
+    scale_color_discrete(guide=F)+scale_y_continuous(labels = fmt_dcimals(3))+
     theme(panel.grid.major = element_blank(),
           panel.grid.minor = element_blank(),
           strip.text.x = element_text(size = 7),
@@ -124,8 +125,8 @@ p4=ggplot(chrCNV,aes(Lengthk,Total))+geom_point()+geom_smooth(method = 'lm',se=F
 
 
 #up_row <- plot_grid(p1, p2, labels = c('A', 'B'), align = 'v')
-bottom_row <- plot_grid(p3, p4, labels = c('C', 'D'), align = 'h')
-plot2=plot_grid(p1,p2, bottom_row, labels = c('A', 'B',''), ncol = 1,rel_heights = c(1,1,1.2),scale = 0.95)
+bottom_row <- plot_grid(p3, p4, labels = c('C', 'D'), align = 'h',scale = 0.95)
+plot2=plot_grid(p1,p2, bottom_row, labels = c('A', 'B',''), ncol = 1,rel_heights = c(1,1,1.2),scale = 1)
 
 
 #plot2=plot_grid(p1,p2,nrow = 2,labels = c('A',"B"),label_size = 6)
@@ -251,7 +252,7 @@ chr.data <- subset(all.data, Chrom=="chr4")
 p1=ggplot(data=chr.data, aes(x= Start, y= CopyNum))+ geom_point(aes(color=CopyNum))+
     scale_x_continuous(labels = scales::unit_format("Kb", 1e-3), breaks=scales::pretty_breaks(n=3))+
     geom_vline(aes(xintercept= 600000), linetype="dashed", size=1.2)+ ylim(c(-1.5,2))+
-    scale_colour_gradient(name='log2(Copy Number)',limits=c(-2,2),low = "blue", high = "red")+ggtitle("Strain Y625 ChrD")+
+    scale_colour_gradient2(name='log2(Copy Number)',limits=c(-2,2),low = 'purple', mid = "blue", high = "red")+ggtitle("Strain Y625 ChrD")+
     ylab("log2(Copy Number)")	+ xlab("")
 
 column.types <- c("character", "numeric", "numeric", "numeric")
@@ -263,11 +264,11 @@ chr.data <- subset(all.data, Chrom=="chr4")
 p2=ggplot(data=chr.data, aes(x= Start, y= CopyNum))+ geom_point(aes(color=CopyNum))+
     scale_x_continuous(labels = scales::unit_format("Kb", 1e-3), breaks=scales::pretty_breaks(n=3))+
     geom_vline(aes(xintercept= 600000), linetype="dashed", size=1.2)+ ylim(c(-1.5,2))+
-    scale_colour_gradient(name='log2(Copy Number)',limits=c(-2,2),low = "blue", high = "red")+ggtitle("Strain Y622 ChrD")+
+    scale_colour_gradient2(name='log2(Copy Number)',limits=c(-2,2),low = "purple",mid="blue", high = "red")+ggtitle("Strain Y622 ChrD")+
     ylab("log2(Copy Number)")	+ xlab("")
 
-plot12=grid_arrange_shared_legend(p1, p2, ncol = 2, nrow = 1)
-ggsave(plot12,filename=paste0(out_dir,"/","fig6B.tiff"), width=174, height=100, units='mm', dpi=500)
+plot12=grid_arrange_shared_legend(p1, p2, ncol = 1, nrow = 2)
+ggsave(plot12,filename=paste0(out_dir,"/","fig6B.tiff"), width=154, height=120, units='mm', dpi=500)
 
 ###HMMCopy adapted from Xuepeng 
 ##
@@ -290,13 +291,13 @@ newdata$chr=mapvalues(newdata$chr,from=c("chr1","chr2","chr3","chr4","chr5","chr
                          to=c("chrA","chrB","chrC","chrD","chrE","chrF","chrG","chrH","chrI","chrJ","chrK","chrL","chrM"))
 
 savedata=newdata[,2:5]
-write.table(file=paste0(out_dir,"/tmp.txt"),savedata,col.names=F,row.names=F,quote=F)
+#write.table(file=paste0(out_dir,"/tmp.txt"),savedata,col.names=F,row.names=F,quote=F)
 tiff(filename=paste0(out_dir,"fig6A.tif"),width=174, height=80, units="mm",res=500)
-plot(newdata[,5],pch=19,col="darkgreen",xlab="",ylab="log2(Copy Number)",xaxt="n")
+plot(newdata[,5],pch=19,cex=0.6,col="darkgreen",xlab="",ylab="log2(Copy Number)",xlim=c(230,12100),xaxt="n")
 abline(v=0,lty=3)
 chr<-summary(newdata[,2])
 st=0
-end<-st;st<-st+chr[[1]];pos<-(end+st)/2;abline(v=st,lty=3);text(pos,-7,labels=newdata[st,2][1],cex = 0.7)
+end<-st;st<-st+chr[[1]];pos<-(end+st)/2;abline(v=st,lty=3);text(pos,-7,labels=newdata[st,2][1],cex = 0.7);#segments(0, 1, x1 = st, y1 = 1, col = "blue", lwd =2)
 end<-st;st<-st+chr[[2]];pos<-(end+st)/2;abline(v=st,lty=3);text(pos,-6,labels=newdata[st,2][1],cex = 0.7)
 for(i in 3:length(chr))
 {
@@ -306,6 +307,7 @@ for(i in 3:length(chr))
     abline(v=st,lty=3)
     text(pos,-5,labels=newdata[st,2][1],cex = 0.7)
 }
+segments(0, 1, x1 = end, y1 = 1, col = "blue", lty=4,lwd =1)
 dev.off()
 
 
