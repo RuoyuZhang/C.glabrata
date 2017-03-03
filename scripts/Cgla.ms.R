@@ -287,6 +287,8 @@ newdata <-dat[order(dat$chr),]
 newdata = newdata[newdata$chr!="chr14",]
 
 newdata$chr=factor(newdata$chr,c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13"))
+chr<-summary(newdata[,2])
+
 newdata$chr=mapvalues(newdata$chr,from=c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13"),
                          to=c("chrA","chrB","chrC","chrD","chrE","chrF","chrG","chrH","chrI","chrJ","chrK","chrL","chrM"))
 
@@ -298,17 +300,18 @@ p3=ggplot(wcnd.df,aes(x,value,color=value))+geom_point()+ylim(c(-2,2))+ylab("log
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),axis.text.x = element_blank(),axis.ticks.x = element_blank())
 
 p3=p3+geom_vline(xintercept = 0,linetype=2)
-#chr<-summary(newdata[,2])
+
 st=0
-end<-st;st<-st+chr[[1]];pos<-(end+st)/2;p3=p3+geom_vline(xintercept = st,linetype=2);p3=p3+annotate("text",x=pos,y=-2,label=as.character(newdata[st,2][1]),size=3)
-end<-st;st<-st+chr[[2]];pos<-(end+st)/2;p3=p3+geom_vline(xintercept = st,linetype=2);p3=p3+annotate("text",x=pos,y=-1.8,label=as.character(newdata[st,2][1]),size=3)
+p3=p3+annotate("text",x=-250,y=-Inf,label='Chr:',size=4,vjust=-1,hjust=0.8)
+end<-st;st<-st+chr[[1]];pos<-(end+st)/2;p3=p3+geom_vline(xintercept = st,linetype=2);p3=p3+annotate("text",x=pos,y=-Inf,label=sub('chr','',as.character(newdata[st,2][1])),size=4,vjust=-1)
+end<-st;st<-st+chr[[2]];pos<-(end+st)/2;p3=p3+geom_vline(xintercept = st,linetype=2);p3=p3+annotate("text",x=pos,y=-Inf,label=sub('chr','',as.character(newdata[st,2][1])),size=4,vjust=-1)
 for(i in 3:length(chr))
 {
     end<-st
     st<-st+chr[[i]]
     pos<-(end+st)/2
     p3=p3+geom_vline(xintercept = st,linetype=2)
-    p3=p3+annotate("text",x=pos,y=-1.6,label=as.character(newdata[st,2][1]),size=3)
+    p3=p3+annotate("text",x=pos,y=-Inf,label=sub('chr','',as.character(newdata[st,2][1])),size=4,vjust=-1)
     
 }
 p3
@@ -361,7 +364,8 @@ draw.cnv = function(sup_dir,out_dir,note,name){
     dat$chr <-factor(dat$chr, levels=chrOrder)
     newdata <-dat[order(dat$chr),]
     newdata = newdata[newdata$chr!="chr14",]
-
+    chr<-summary(newdata[,2])
+    
     newdata$chr=factor(newdata$chr,c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13"))
     newdata$chr=mapvalues(newdata$chr,from=c("chr1","chr2","chr3","chr4","chr5","chr6","chr7","chr8","chr9","chr10","chr11","chr12","chr13"),
                       to=c("chrA","chrB","chrC","chrD","chrE","chrF","chrG","chrH","chrI","chrJ","chrK","chrL","chrM"))
@@ -375,14 +379,15 @@ draw.cnv = function(sup_dir,out_dir,note,name){
     p3=p3+geom_vline(xintercept = 0,linetype=2)
     #chr<-summary(newdata[,2])
     st=0
-    end<-st;st<-st+chr[[1]];pos<-(end+st)/2;p3=p3+geom_vline(xintercept = st,linetype=2);p3=p3+annotate("text",x=pos,y=-2,label=as.character(newdata[st,2][1]),size=3)
-    end<-st;st<-st+chr[[2]];pos<-(end+st)/2;p3=p3+geom_vline(xintercept = st,linetype=2);p3=p3+annotate("text",x=pos,y=-1.8,label=as.character(newdata[st,2][1]),size=3)
+    p3=p3+annotate("text",x=-250,y=-Inf,label='Chr:',size=4,vjust=-1,hjust=0.8)
+    end<-st;st<-st+chr[[1]];pos<-(end+st)/2;p3=p3+geom_vline(xintercept = st,linetype=2);p3=p3+annotate("text",x=pos,y=-Inf,label=sub('chr','',as.character(newdata[st,2][1])),size=4,vjust=-1)
+    end<-st;st<-st+chr[[2]];pos<-(end+st)/2;p3=p3+geom_vline(xintercept = st,linetype=2);p3=p3+annotate("text",x=pos,y=-Inf,label=sub('chr','',as.character(newdata[st,2][1])),size=4,vjust=-1)
     for(i in 3:length(chr)){
         end<-st
         st<-st+chr[[i]]
         pos<-(end+st)/2
         p3=p3+geom_vline(xintercept = st,linetype=2)
-        p3=p3+annotate("text",x=pos,y=-1.6,label=as.character(newdata[st,2][1]),size=3)
+        p3=p3+annotate("text",x=pos,y=-Inf,label=sub('chr','',as.character(newdata[st,2][1])),size=4,vjust=-1)
     
     }
     
