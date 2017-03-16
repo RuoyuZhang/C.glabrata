@@ -35,7 +35,7 @@ plink.pca$fluconazole=factor(plink.pca$fluconazole,c('Not Available','14.4','43.
 #figure 2 add cluster number later in paint
 cpalette = c("lightgrey", "#EABE94", "#0B775E", "#35274A", "#F2300F")
 set.seed(20)
-p=ggplot(plink.pca,aes(PC1,PC2,color=factor(fluconazole),shape=Clade))+geom_jitter(size=I(4),alpha=0.6,width = 0.02,height = 0.015)+xlab("PC1")+ylab("PC2")+
+p=ggplot(plink.pca,aes(PC1,PC2,color=factor(fluconazole),shape=Clade))+geom_jitter(size=I(4),alpha=0.6,width = 0.02,height = 0.015)+xlab("PC1 (15.0%)")+ylab("PC2 (13.5%)")+
     scale_color_manual(name="Fluconazole MIC",values = cpalette)
                        #values = wes_palette(5,name='Rushmore'))
     
@@ -137,6 +137,19 @@ write.table(bin.cds.high,file=paste0(out_dir,"/cnv.0.3.bed"),row.names = F,col.n
 
 # exonic diverstiy test
 chisq.test(matrix(c(8045535,125739,12338305,261338),nrow=2))
+
+# Fig S Watterson's theta
+p1=ggplot(exom10k,aes(start,theta,color=chr))+geom_line(size=I(0.5))+facet_grid(~chr,scales="free_x",space='free_x')+xlab("")+ylab("Watterson's theta")+
+    scale_x_continuous(breaks = seq(0, 1000000, 500000),labels=c('0k','500k','1000k'))+scale_color_discrete(guide=F)+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          strip.text.x = element_text(size = 7),
+          strip.background = element_blank(),
+          panel.border = element_rect(colour = "gray"),
+          axis.ticks.x = element_blank(),axis.text.x = element_blank(),axis.text.y = element_text(size = 8),
+          axis.title.y =element_text(size=8),
+          panel.spacing.x = unit(0.1, "mm"))
+ggsave(p1,filename=paste0(out_dir,"/sup/","figS_theta.tiff"), width=174, height=80, units='mm', dpi=500)
 
 
 # gwas figure, fig7
