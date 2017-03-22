@@ -23,6 +23,7 @@ pnas.drug = read.csv("f:/Cornell/experiment/c.glabrata/manuscript/analysis/scrip
 
 plink.eigenv = read.table('f:/Cornell/experiment/c.glabrata/manuscript/analysis/scripts/Cgla.pca.eigenval')
 pc1 = plink.eigenv[1]/sum(plink.eigenv)
+qplot(1:nrow(plink.eigenv[1]),plink.eigenv[1])+labs(x="Eigen Value Ranking",y="Eigen Value")
 
 plink.pca = read.table("f:/Cornell/experiment/c.glabrata/manuscript/analysis/scripts/Cgla.pca.eigenvec",header=F)
 plink.pca = plink.pca[,c(1,3,4,5)]
@@ -137,6 +138,22 @@ write.table(bin.cds.high,file=paste0(out_dir,"/cnv.0.3.bed"),row.names = F,col.n
 
 # exonic diverstiy test
 chisq.test(matrix(c(8045535,125739,12338305,261338),nrow=2))
+
+# adhesin gene test
+gff = read.csv("f:/Cornell/experiment/c.glabrata/manuscript/analysis/scripts/gff/C_glabrata_current.gene.csv",header=F)
+gff.sub = gff[,c(9,10)]
+colnames(gff.sub)=c("Gene","functions")
+
+NSS = read.csv("f:/Cornell/experiment/c.glabrata/manuscript/analysis/scripts/countNS_gene.out.csv",header=T)
+NSS = merge(NSS,gff.sub)
+
+NSS = NSS[order(NSS$NS_Kb,decreasing = T),]
+length(grep('adhesin',NSS$functions,ignore.case = T))
+length(grep('adhesin',NSS$functions[1:100],ignore.case = T))
+
+# total adhesin gene 68
+fisher.test(matrix(c(5199,68,100,8),nrow = 2))
+write.table(NSS[1:100,],file = "f:/Cornell/experiment/c.glabrata/manuscript/analysis/result/TableS2.xls",quote = F,row.names = F,col.names = F,sep='\t')
 
 # Fig S Watterson's theta
 p1=ggplot(exom10k,aes(start,theta,color=chr))+geom_line(size=I(0.5))+facet_grid(~chr,scales="free_x",space='free_x')+xlab("")+ylab("Watterson's theta")+
