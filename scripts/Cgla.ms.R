@@ -95,25 +95,15 @@ p1=ggplot(exom10k,aes(start,pi,color=chr))+geom_line(size=I(0.5))+facet_grid(~ch
           strip.text.x = element_text(size = 7),
           strip.background = element_blank(),
           panel.border = element_rect(colour = "gray"),
-          axis.ticks.x = element_blank(),axis.text.x = element_blank(),axis.text.y = element_text(size = 8),
-          axis.title.y =element_text(size=8),
+          axis.ticks.x = element_blank(),axis.text.x = element_blank(),axis.text.y = element_text(size = 9),
+          axis.title.y =element_text(size=9),
           panel.spacing.x = unit(0.1, "mm"))
 
-fmt_dcimals <- function(decimals=0){function(x) format(x,nsmall = decimals,scientific = FALSE)}
-p2=ggplot(bin.cds.df,aes(pos,freq,color=chr))+geom_line(size=I(0.5))+facet_grid(~chr,scales="free_x",space='free_x')+xlab("")+ylab("Duplication Frequency")+
-    scale_color_discrete(guide=F)+scale_y_continuous(labels = fmt_dcimals(3))+
-    theme(panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank(),
-          strip.text.x = element_text(size = 7),
-          strip.background = element_blank(),
-          panel.border = element_rect(colour = "gray"),
-          axis.ticks.x = element_blank(),axis.text.x = element_blank(),axis.text.y = element_text(size = 8),
-          axis.title.y =element_text(size=8),
-          panel.spacing.x = unit(0.1, "mm"))
+
 
 cor.test(exom10k$pi,exom10k$exon)
 p3=ggplot(exom10k,aes(exon,pi))+geom_point(alpha=0.2,color='darkblue')+geom_smooth(method = 'lm',se=F)+xlab("Exon Propotion")+ylab(expression(paste("Genetic Diversity (",pi,")")))+#ylab(expression(paste("Watterson's ",theta)))+
-    annotate("text", x = c(0.2,0.2), y = c(0.0045,0.005), label = c("rho = -0.15","P value = 6.44e-8"),size=3)+
+    annotate("text", x = c(0.25,0.25), y = c(0.0045,0.005), label = c("rho = -0.15","P value = 6.44e-8"),size=3)+
     theme(axis.title=element_text(size=9))
 
 chrCNV = read.table("f:/Cornell/experiment/c.glabrata/manuscript/analysis/scripts/chromLength_CNV.txt",header=T)
@@ -126,13 +116,47 @@ p4=ggplot(chrCNV,aes(Lengthk,Total))+geom_point()+geom_smooth(method = 'lm',se=F
 
 
 #up_row <- plot_grid(p1, p2, labels = c('A', 'B'), align = 'v')
-bottom_row <- plot_grid(p3, p4, labels = c('C', 'D'), align = 'h',scale = 0.95)
-plot2=plot_grid(p1,p2, bottom_row, labels = c('A', 'B',''), ncol = 1,rel_heights = c(1,1,1.2),scale = 1)
-
+#bottom_row <- plot_grid(p3, p4, labels = c('C', 'D'), align = 'h',scale = 0.95)
+#plot2=plot_grid(p1,p2, bottom_row, labels = c('A', 'B',''), ncol = 1,rel_heights = c(1,1,1.2),scale = 1)
 
 #plot2=plot_grid(p1,p2,nrow = 2,labels = c('A',"B"),label_size = 6)
 ggsave(plot2,filename=paste0(out_dir,"/","fig3.tiff"), width=174, height=160, units='mm', dpi=500)
 
+# new fig 2 and 5
+plot2new = plot_grid(p1, p3, labels = c('A', 'B'), ncol=1,rel_heights = c(1,1))
+ggsave(plot2new,filename=paste0(out_dir,"/","fig2new.tiff"), width=174, height=160, units='mm', dpi=500)
+
+# CG figure fig4
+dt <- read.table("f:/Cornell/experiment/c.glabrata/manuscript/analysis/scripts/MutRate.txt", header=T)
+dt$trinuc <- factor(dt$trinuc, levels=c("AAA", "AAC", "AAG", "AAT", "CAA", "CAC", "CAG", "CAT", "GAA", "GAC", "GAG", "GAT", "TAA", "TAC", "TAG", "TAT", "ACA", "ACC", "ACG", "ACT", "CCA", "CCC", "CCG", "CCT", "GCA", "GCC", "GCG", "GCT", "TCA", "TCC", "TCG", "TCT"))
+colvec <- ifelse(grepl("CG", dt$trinuc),"red", "black")
+
+#theme_set(theme_bw(base_size=12))
+#q<-qplot(data=dt, x=trinuc, y=rate2, geom=c("point"), color=type)
+#q + theme(axis.text.x = element_text(size=8, angle=90),legend.position="none")
+p = ggplot(data=dt, aes(x=trinuc, y=rate2, color=type)) +geom_point(size=2) + 
+    theme(axis.text.x = element_text(size=7, angle=90, vjust = 0.5, colour=colvec),
+          legend.justification=c(0,0),legend.margin=margin(b=-1,unit = 'cm'), legend.position=c(0.03,0.96),legend.text = element_text(size = 7),
+          legend.title = element_text(size=8),axis.title=element_text(size=9))+
+    labs(title="", x="", y="Relative Mutation Rate")+ 
+    scale_color_discrete(expression(paste("Base at 2"^nd, " position")),labels = c("A/T", "C/G"))+guides(color=guide_legend(title.position="top",keyheight=0.5))
+label.df = data.frame(trinuc = c("ACG","CCG",'GCG','TCG'), rate2 = c(1.75,2.25,1.9,1.9),type = c('c',"c",'c',"c"))
+p4new=p + geom_text(data=label.df,label = "*",color = I('black'))
+#ggsave(p,filename=paste0(out_dir,"/fig4.tiff"), width=174, height=120, units='mm', dpi=500)
+
+bottom_row <- plot_grid(p3, p4new, labels = c('B', 'C'), align = 'h',scale = 1,rel_widths = c(0.8,1))
+plot4new=plot_grid(p1, bottom_row, labels = c('A', ''), ncol = 1,rel_heights = c(1,1,1.2),scale = 1)
+
+ggsave(plot4new,filename=paste0(out_dir,"/","fig2ABC.tiff"), width=174, height=160, units='mm', dpi=500)
+
+
+#plot5new = plot_grid(p1, p3, labels = c('A', 'B'), ncol=1,rel_heights = c(1,1))
+
+
+
+
+
+####
 bin.cds.high = bin.cds.df[bin.cds.df$freq>0.3,]
 write.table(bin.cds.high,file=paste0(out_dir,"/cnv.0.3.bed"),row.names = F,col.names = F,quote = F)
 
@@ -226,21 +250,7 @@ gwas.phe = merge(plink.pca,gwas.012)
 ggplot(gwas.phe[gwas.phe$fluconazole!="Not Available",],aes(genotype,as.numeric(as.character(fluconazole))))+geom_jitter(height = 0,width = 0.15,size=2)+geom_smooth(method = 'lm')+
     ylim(0,200)
 
-# CG figure fig4
-dt <- read.table("f:/Cornell/experiment/c.glabrata/manuscript/analysis/scripts/MutRate.txt", header=T)
-dt$trinuc <- factor(dt$trinuc, levels=c("AAA", "AAC", "AAG", "AAT", "CAA", "CAC", "CAG", "CAT", "GAA", "GAC", "GAG", "GAT", "TAA", "TAC", "TAG", "TAT", "ACA", "ACC", "ACG", "ACT", "CCA", "CCC", "CCG", "CCT", "GCA", "GCC", "GCG", "GCT", "TCA", "TCC", "TCG", "TCT"))
-colvec <- ifelse(grepl("CG", dt$trinuc),"red", "black")
 
-#theme_set(theme_bw(base_size=12))
-#q<-qplot(data=dt, x=trinuc, y=rate2, geom=c("point"), color=type)
-#q + theme(axis.text.x = element_text(size=8, angle=90),legend.position="none")
-p = ggplot(data=dt, aes(x=trinuc, y=rate2, color=type)) +geom_point(size=3) + 
-    theme(axis.text.x = element_text(size=8, angle=90, vjust = 0.5, colour=colvec),legend.position = 'top',legend.title = element_text(size=10))+
-    labs(title="", x="", y="Relative Mutation Rate")+ 
-    scale_color_discrete("Base at Second Position\n",labels = c("A/T", "C/G"))+guides(color=guide_legend(title.position="top"))
-label.df = data.frame(trinuc = c("ACG","CCG",'GCG','TCG'), rate2 = c(1.75,2.25,1.9,1.9),type = c('c',"c",'c',"c"))
-p=p + geom_text(data=label.df,label = "*",color = I('black'))
-ggsave(p,filename=paste0(out_dir,"/fig4.tiff"), width=174, height=120, units='mm', dpi=500)
 
 
 # CNV figure
@@ -282,8 +292,8 @@ chr.data <- subset(all.data, Chrom=="chr4")
 p1=ggplot(data=chr.data, aes(x= Start, y= CopyNum))+ geom_point(aes(color=CopyNum))+
     scale_x_continuous(labels = scales::unit_format("Kb", 1e-3), breaks=scales::pretty_breaks(n=3))+
     geom_vline(aes(xintercept= 600000), linetype="dashed", size=1.2)+ ylim(c(-1.5,2))+
-    scale_colour_gradient2(name='log2(Copy Number)',limits=c(-2,2),low = 'purple', mid = "blue", high = "red")+ggtitle("Strain Y625 ChrD")+
-    ylab("log2(Copy Number)")	+ xlab("") +theme(plot.title = element_text(hjust = 0.5))
+    scale_colour_gradient2(name=expression(paste(log[2], "(Copy Number)")),limits=c(-2,2),low = 'purple', mid = "blue", high = "red")+ggtitle("Strain Y625 ChrD")+
+    ylab(expression(paste(log[2], "(Copy Number)")))	+ xlab("") +theme(plot.title = element_text(hjust = 0.5))
 
 column.types <- c("character", "numeric", "numeric", "numeric")
 all.data <- read.table("f:/Cornell/experiment/c.glabrata/manuscript/analysis/scripts/11_cnv.seg", header=FALSE, colClasses=column.types)
@@ -294,8 +304,8 @@ chr.data <- subset(all.data, Chrom=="chr4")
 p2=ggplot(data=chr.data, aes(x= Start, y= CopyNum))+ geom_point(aes(color=CopyNum))+
     scale_x_continuous(labels = scales::unit_format("Kb", 1e-3), breaks=scales::pretty_breaks(n=3))+
     geom_vline(aes(xintercept= 600000), linetype="dashed", size=1.2)+ ylim(c(-1.5,2))+
-    scale_colour_gradient2(name='log2(Copy Number)',limits=c(-2,2),low = "purple",mid="blue", high = "red")+ggtitle("Strain Y622 ChrD")+
-    ylab("log2(Copy Number)")+ xlab("") +theme(plot.title = element_text(hjust = 0.5))
+    scale_colour_gradient2(name=expression(paste(log[2], "(Copy Number)")),limits=c(-2,2),low = "purple",mid="blue", high = "red")+ggtitle("Strain Y622 ChrD")+
+    ylab(expression(paste(log[2], "(Copy Number)")))+ xlab("") +theme(plot.title = element_text(hjust = 0.5))
 
 plot12=grid_arrange_shared_legend(p1, p2, ncol = 1, nrow = 2)
 ggsave(plot12,filename=paste0(out_dir,"/","fig6B.tiff"), width=154, height=120, units='mm', dpi=500)
@@ -325,8 +335,8 @@ newdata$chr=mapvalues(newdata$chr,from=c("chr1","chr2","chr3","chr4","chr5","chr
 savedata=newdata[,2:5]
 
 wcnd.df = data.frame(x=seq(1,length(newdata[,5])),value=newdata[,5])
-p3=ggplot(wcnd.df,aes(x,value,color=value))+geom_point()+ylim(c(-2,2))+ylab("log2(Copy Number)")+xlab("")+
-    scale_colour_gradient2(name='log2(Copy Number)',limits=c(-2,2),low = "purple",mid="blue", high = "red")+theme(legend.position ='none')+
+p3=ggplot(wcnd.df,aes(x,value,color=value))+geom_point()+ylim(c(-2,2))+ylab(expression(paste(log[2], "(Copy Number)")))+xlab("")+
+    scale_colour_gradient2(name=expression(paste(log[2], "(Copy Number)")),limits=c(-2,2),low = "purple",mid="blue", high = "red")+theme(legend.position ='none')+
     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),axis.text.x = element_blank(),axis.ticks.x = element_blank())
 
 p3=p3+geom_vline(xintercept = 0,linetype=2)
@@ -348,7 +358,27 @@ p3
 ggsave(p3,filename=paste0(out_dir,"/","fig6A2.tiff"), width=174, height=80, units='mm', dpi=500)
          
 p4=plot_grid(p3,plot12,nrow = 2,rel_heights = c(1,2))
-ggsave(p4,filename=paste0(out_dir,"/","fig6.tiff"), width=174, height=180, units='mm', dpi=500)
+#ggsave(p4,filename=paste0(out_dir,"/","fig6.tiff"), width=174, height=180, units='mm', dpi=500)
+
+fmt_dcimals <- function(decimals=0){function(x) format(x,nsmall = decimals,scientific = FALSE)}
+p3b=ggplot(bin.cds.df,aes(pos,freq,color=chr))+geom_line(size=I(0.5))+facet_grid(~chr,scales="free_x",space='free_x')+xlab("")+ylab("Duplication Frequency")+
+    scale_color_discrete(guide=F)+scale_y_continuous(labels = fmt_dcimals(3))+
+    theme(panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          strip.text.x = element_text(size = 7),
+          strip.background = element_blank(),
+          panel.border = element_rect(colour = "gray"),
+          axis.ticks.x = element_blank(),axis.text.x = element_blank(),axis.text.y = element_text(size = 9),
+          axis.title.y =element_text(size=9),
+          panel.spacing.x = unit(0.1, "mm"))
+
+p3ab = plot_grid(p4,p3b,ncol=1,labels = c("A","B"),rel_heights = c(4,1.2),scale = 0.95)
+ggsave(p3ab,filename=paste0(out_dir,"/","fig3ab.tiff"), width=174, height=210, units='mm', dpi=500)
+
+
+
+
+
 
 ###gwas for cnv
 gwas=function(Xa,phe,pc1,pc2,pc3,maf=0.05){
